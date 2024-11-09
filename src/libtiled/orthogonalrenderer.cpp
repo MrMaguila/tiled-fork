@@ -199,12 +199,7 @@ QPainterPath OrthogonalRenderer::shape(const MapObject *object) const
         break;
     }
     case MapObject::Point: {
-        const QPixmap& image = object->image();
-        if (!image.isNull())
-            path = pointShape(object->position());
-        else
-            path = pointShape(object->position());
-
+        path = pointShape(object->position());
         break;
     }
     case MapObject::Text: {
