@@ -120,7 +120,10 @@ public:
         CellProperty            = 1 << 10,
         ShapeProperty           = 1 << 11,
         TemplateProperty        = 1 << 12,
-        CustomProperties        = 1 << 13,
+        ImageProperty           = 1 << 13,
+        ImageSourceProperty     = 1 << 14,
+        ImageOffsetProperty     = 1 << 15,
+        CustomProperties        = 1 << 16,
         AllProperties           = 0xFF
     };
 
@@ -222,6 +225,23 @@ public:
     MapObject *clone() const;
     void copyPropertiesFrom(const MapObject *object);
 
+    const QPixmap& image() const;
+    const QUrl& imageSource() const;
+
+    bool setImage(const QPixmap &image, const QUrl &source);
+    bool setImage(const QImage &image, const QString &source);
+    bool setImage(const QUrl &url);
+    bool setImage(const ImageReference &image);
+
+    const QPoint &imageOffset() const;
+    void setImageOffset(const QPoint &imageOffset);
+
+    qreal imageOffsetX() const;
+    void setImageOffsetX(int x);
+
+    qreal imageOffsetY() const;
+    void setImageOffsetY(int y);
+
     const MapObject *templateObject() const;
 
     void syncWithTemplate();
@@ -249,6 +269,9 @@ private:
     qreal mRotation = 0.0;
     bool mVisible = true;
     bool mTemplateBase = false;
+    QPixmap mImage;
+    QUrl mImageSource;
+    QPoint mImageOffset = QPoint(0, 0);
     ChangedProperties mChangedProperties;
 };
 
@@ -501,6 +524,30 @@ inline void MapObject::setPropertyChanged(Property property, bool state)
 
 inline bool MapObject::propertyChanged(Property property) const
 { return mChangedProperties.testFlag(property); }
+
+inline const QPixmap& MapObject::image() const
+{ return mImage; }
+
+inline const QUrl& MapObject::imageSource() const
+{ return mImageSource; }
+
+inline const QPoint& MapObject::imageOffset() const
+{ return mImageOffset; }
+
+inline void MapObject::setImageOffset(const QPoint &imageOffset)
+{ mImageOffset = imageOffset; }
+
+inline qreal MapObject::imageOffsetX() const
+{ return mImageOffset.x(); }
+
+inline void MapObject::setImageOffsetX(int x)
+{ mImageOffset.setX(x); }
+
+inline qreal MapObject::imageOffsetY() const
+{ return mImageOffset.y(); }
+
+inline void MapObject::setImageOffsetY(int y)
+{ mImageOffset.setY(y); }
 
 inline bool MapObject::isTemplateInstance() const
 { return mObjectTemplate != nullptr; }

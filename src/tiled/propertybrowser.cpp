@@ -839,6 +839,17 @@ void PropertyBrowser::addMapObjectProperties()
     bool isPoint = mapObject->shape() == MapObject::Point;
     addProperty(RotationProperty, QMetaType::Double, tr("Rotation"), groupProperty)->setEnabled(!isPoint);
 
+
+    QtVariantProperty *imageSourceProperty = addProperty(ImageSourceProperty,
+                                                         filePathTypeId(),
+                                                         tr("Image"), groupProperty);
+
+    imageSourceProperty->setAttribute(QLatin1String("filter"),
+                                      Utils::readableImageFormatsFilter());
+
+    addProperty(OffsetXProperty, QMetaType::Int, tr("imageOffsetX"), groupProperty);
+    addProperty(OffsetYProperty, QMetaType::Int, tr("imageOffsetY"), groupProperty);
+
     if (mMapObjectFlags & ObjectHasTile) {
         QtVariantProperty *flippingProperty =
                 addProperty(FlippingProperty, VariantPropertyManager::flagTypeId(),
@@ -1311,6 +1322,25 @@ QUndoCommand *PropertyBrowser::applyMapObjectValueTo(PropertyId id, const QVaria
                                                      "Flip %n Object(s)",
                                                      nullptr,
                                                      mMapDocument->selectedObjects().size()));
+        break;
+    }
+    case ImageSourceProperty: {
+        command = new ChangeMapObject(mDocument, mapObject, MapObject::ImageSourceProperty, val.value<FilePath>().url);
+
+        break;
+    }
+    case OffsetXProperty: {
+        command = new ChangeMapObject(mDocument, mapObject,
+                                      MapObject::ImageOffsetProperty,
+                                      QPoint(val.toInt(), mapObject->imageOffsetY()));
+
+        break;
+    }
+    case OffsetYProperty: {
+        command = new ChangeMapObject(mDocument, mapObject,
+                                      MapObject::ImageOffsetProperty,
+                                      QPoint(mapObject->imageOffsetX(), val.toInt()));
+
         break;
     }
     }
@@ -1905,6 +1935,9 @@ void PropertyBrowser::updateProperties()
         }
 
         mIdToProperty[RotationProperty]->setValue(mapObject->rotation());
+        mIdToProperty[ImageSourceProperty]->setValue(QVariant::fromValue(FilePath { mapObject->imageSource() }));
+        mIdToProperty[OffsetXProperty]->setValue(mapObject->imageOffsetX());
+        mIdToProperty[OffsetYProperty]->setValue(mapObject->imageOffsetY());
 
         if (flags & ObjectHasTile) {
             int flippingFlags = 0;

@@ -752,9 +752,24 @@ void MapWriterPrivate::writeObject(QXmlStreamWriter &w,
             w.writeAttribute(QStringLiteral("height"), QString::number(size.height()));
     }
 
+    if (shouldWrite(true, isTemplateInstance, mapObject.propertyChanged(MapObject::ImageOffsetProperty))) {
+        const QPoint imageOffset = mapObject.imageOffset();
+
+        if (imageOffset.x() != 0)
+            w.writeAttribute(QStringLiteral("io_x"), QString::number(imageOffset.x()));
+        if (imageOffset.x() != 0)
+            w.writeAttribute(QStringLiteral("io_y"), QString::number(imageOffset.y()));
+    }
+
     const qreal rotation = mapObject.rotation();
     if (shouldWrite(rotation != 0.0, isTemplateInstance, mapObject.propertyChanged(MapObject::RotationProperty)))
         w.writeAttribute(QStringLiteral("rotation"), QString::number(rotation));
+
+    if (shouldWrite(true, isTemplateInstance, mapObject.propertyChanged(MapObject::ImageSourceProperty)))
+    {
+        const QUrl& imageSource = mapObject.imageSource();
+        writeImage(w, imageSource, mapObject.image(), QColor(), QSize());
+    }
 
     if (shouldWrite(!mapObject.isVisible(), isTemplateInstance, mapObject.propertyChanged(MapObject::VisibleProperty)))
         w.writeAttribute(QStringLiteral("visible"), QLatin1String(mapObject.isVisible() ? "1" : "0"));

@@ -35,6 +35,7 @@
 #include "objectgroup.h"
 #include "objecttemplate.h"
 #include "tile.h"
+#include "imagecache.h"
 
 #include <QFontMetricsF>
 #include <qmath.h>
@@ -314,6 +315,9 @@ QVariant MapObject::mapObjectProperty(Property property) const
     case RotationProperty:      return mRotation;
     case CellProperty:          Q_ASSERT(false); break;
     case ShapeProperty:         return mShape;
+    case ImageProperty:         return mImage;
+    case ImageSourceProperty:   return mImageSource;
+    case ImageOffsetProperty:   return mImageOffset;
     case TemplateProperty:      Q_ASSERT(false); break;
     case CustomProperties:      Q_ASSERT(false); break;
     case AllProperties:         Q_ASSERT(false); break;
@@ -336,6 +340,8 @@ void MapObject::setMapObjectProperty(Property property, const QVariant &value)
     case RotationProperty:      setRotation(value.toReal()); break;
     case CellProperty:          Q_ASSERT(false); break;
     case ShapeProperty:         setShape(value.value<Shape>()); break;
+    case ImageSourceProperty:   setImage(value.toUrl()); break;
+    case ImageOffsetProperty:   setImageOffset(value.toPoint()); break;
     case TemplateProperty:      Q_ASSERT(false); break;
     case CustomProperties:      Q_ASSERT(false); break;
     case AllProperties:         Q_ASSERT(false); break;
@@ -375,6 +381,8 @@ MapObject *MapObject::clone() const
     o->setCell(mCell);
     o->setRotation(mRotation);
     o->setVisible(mVisible);
+    o->setImage(mImage, mImageSource);
+    o->setImageOffset(mImageOffset);
     o->setChangedProperties(mChangedProperties);
     o->setObjectTemplate(mObjectTemplate);
     return o;
@@ -390,9 +398,43 @@ void MapObject::copyPropertiesFrom(const MapObject *object)
     setCell(object->cell());
     setRotation(object->rotation());
     setVisible(object->isVisible());
+    setImage(object->image(), object->imageSource());
+    setImageOffset(object->imageOffset());
     setProperties(object->properties());
     setChangedProperties(object->changedProperties());
     setObjectTemplate(object->objectTemplate());
+}
+
+
+bool MapObject::setImage(const QPixmap &image, const QUrl &source)
+{
+    mImageSource = source;
+    mImage = image;
+
+    if (image.isNull())
+        return false;
+
+    return true;
+}
+
+/**
+ * Exists only because the Python plugin interface does not handle QUrl (would
+ * be nice to add this). Assumes \a source is a local file when it would
+ * otherwise be a relative URL (without scheme).
+ */
+bool MapObject::setImage(const QImage &image, const QString &source)
+{
+    return setImage(QPixmap::fromImage(image), Tiled::toUrl(source));
+}
+
+bool MapObject::setImage(const QUrl &url)
+{
+    return setImage(ImageCache::loadPixmap(Tiled::urlToLocalFileOrQrc(url)), url);
+}
+
+bool MapObject::setImage(const ImageReference &image)
+{
+    return setImage(image.create(), image.source);
 }
 
 const MapObject *MapObject::templateObject() const
@@ -430,6 +472,12 @@ void MapObject::syncWithTemplate()
 
     if (!propertyChanged(MapObject::VisibleProperty))
         setVisible(base->isVisible());
+
+    if (!propertyChanged(MapObject::ImageSourceProperty))
+        setImage(base->imageSource());
+
+    if (!propertyChanged(MapObject::ImageOffsetProperty))
+        setImageOffset(base->imageOffset());
 }
 
 void MapObject::detachFromTemplate()

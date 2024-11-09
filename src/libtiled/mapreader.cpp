@@ -1193,6 +1193,8 @@ std::unique_ptr<MapObject> MapReaderPrivate::readObject()
     const qreal y = atts.value(QLatin1String("y")).toDouble();
     const qreal width = atts.value(QLatin1String("width")).toDouble();
     const qreal height = atts.value(QLatin1String("height")).toDouble();
+    const int imageOffsetX = atts.value(QLatin1String("io_x")).toInt();
+    const int imageOffsetY = atts.value(QLatin1String("io_y")).toInt();
     const auto visibleRef = atts.value(QLatin1String("visible"));
 
     QString className = atts.value(QLatin1String("class")).toString();
@@ -1201,6 +1203,7 @@ std::unique_ptr<MapObject> MapReaderPrivate::readObject()
 
     const QPointF pos(x, y);
     const QSizeF size(width, height);
+    const QPoint imageOffset(imageOffsetX, imageOffsetY);
 
     auto object = std::make_unique<MapObject>(name, className, pos, size);
 
@@ -1211,9 +1214,11 @@ std::unique_ptr<MapObject> MapReaderPrivate::readObject()
     }
 
     object->setId(id);
+    object->setImageOffset(imageOffset);
 
     object->setPropertyChanged(MapObject::NameProperty, !name.isEmpty());
     object->setPropertyChanged(MapObject::SizeProperty, !size.isEmpty());
+    object->setPropertyChanged(MapObject::ImageOffsetProperty, !size.isEmpty());
 
     bool ok;
     const qreal rotation = atts.value(QLatin1String("rotation")).toDouble(&ok);
@@ -1256,6 +1261,10 @@ std::unique_ptr<MapObject> MapReaderPrivate::readObject()
             xml.skipCurrentElement();
             object->setShape(MapObject::Point);
             object->setPropertyChanged(MapObject::ShapeProperty);
+        } else if (xml.name() == QLatin1String("image")) {
+            object->setImage(readImage());
+            object->setPropertyChanged(MapObject::ImageSourceProperty);
+            object->setPropertyChanged(MapObject::ImageProperty);
         } else {
             readUnknownElement();
         }
