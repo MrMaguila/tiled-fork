@@ -131,11 +131,11 @@ void MapObjectItem::paint(QPainter *painter,
                           QWidget *)
 {
     const auto renderer = mMapDocument->renderer();
-    //const qreal painterScale = renderer->painterScale();
+    const qreal painterScale = renderer->painterScale();
 
     const qreal previousOpacity = painter->opacity();
 
-    //if (flags() & QGraphicsItem::ItemIgnoresTransformations)
+    if (flags() & QGraphicsItem::ItemIgnoresTransformations)
         renderer->setPainterScale(1);
 
     if (mIsHoveredIndicator)
@@ -182,7 +182,7 @@ void MapObjectItem::paint(QPainter *painter,
         painter->setOpacity(previousOpacity);
     }
 
-    //renderer->setPainterScale(painterScale);
+    renderer->setPainterScale(painterScale);
 }
 
 void MapObjectItem::setPolygon(const QPolygonF &polygon)
