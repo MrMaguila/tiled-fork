@@ -1,9 +1,21 @@
-### Unreleased
+### Tiled 1.11.2 (28 Jan 2025)
 
+* YY plugin: Fixed compatibility with GameMaker 2024 (#4132)
+* Fixed crash while handling file reloads without any files opened
+* Fixed crash when closing the last file with multiple custom properties selected
+* snap: Fixed crash on startup on Wayland
+* AppImage: Updated to Sentry 0.7.19
+
+### Tiled 1.11.1 (11 Jan 2025)
+
+* Releases now ship with support for loading Aseprite images (#4109)
 * Scripting: Added `FileFormat.nameFilter`
 * Scripting: Added `MapEditor.currentBrushChanged` signal
 * Scripting: Added `tiled.cursor` to create mouse cursor values
 * Scripting: Added `Tileset.transformationFlags` (#3753)
+* Scripting: Added `Dialog.addRadioButtonGroup` for selecting one of a list of mutually exclusive options (#4107)
+* Scripting: Made `currentWangSet` and `currentWangColorIndex` properties writeable (#4105)
+* AutoMapping: Ignore rules with empty input or output regions (#3834)
 * Fixed saving/loading of custom properties set on worlds (#4025)
 * Fixed issue with placing tile objects after switching maps (#3497)
 * Fixed crash when accessing a world through a symlink (#4042)
@@ -11,6 +23,9 @@
 * Fixed error reporting when exporting on the command-line (by Shuhei Nagasawa, #4015)
 * Fixed updating of object label when text changes without changing size
 * Fixed minimum value of spinbox in Tile Animation Editor
+* Fixed loading of custom property types in tilesets referenced by tile stamps (#4044)
+* Fixed compile against Qt 6.8
+* snap: Updated to core24
 * AppImage: Updated to Sentry 0.7.13
 
 ### Tiled 1.11.0 (27 June 2024)

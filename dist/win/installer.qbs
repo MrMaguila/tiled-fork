@@ -59,6 +59,10 @@ WindowsInstallerPackage {
         if (rpMapEnabled)
             defs.push("RpMap");
 
+        var imageFormatsPath = FileInfo.joinPaths(Qt.core.pluginPath, "imageformats")
+        if (File.exists(FileInfo.joinPaths(imageFormatsPath, "qaseprite.dll")))
+            defs.push("AsepriteImageFormatPlugin=qaseprite.dll");
+
         // Since Qt 6.2 we rely on the schannel backend.
         if (Qt.core.versionMajor < 6 || Qt.core.versionMinor < 2) {
             if (project.openSslPath) {
